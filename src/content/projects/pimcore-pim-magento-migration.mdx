@@ -1,0 +1,30 @@
+---
+title: "Pimcore PIM → Magento 2 Storefront Migration"
+summary: "Led a multi-month migration of a major international eCommerce platform's product information hub from Pimcore 6.9 to 10.5, refactoring API contracts feeding the Magento 2 storefront."
+stack: ["Pimcore", "Magento 2", "PHP", "Twig", "MySQL", "REST APIs"]
+role: "Software Engineer (Lead)"
+period: "2024-2025"
+cover: "/images/projects/pimcore-cover.png"
+---
+
+## Context
+
+The platform used Pimcore as a central PIM (Product Information Management) data hub feeding a Magento 2 storefront. Pimcore held thousands of data objects spanning products, categories, asset metadata, and relational structures, exposing them via API to Magento for display.
+
+The Pimcore version had aged out of long-term support and required migration from 6.9 to 10.5 — a non-trivial jump touching data models, class definitions, the admin UI, and every API contract feeding Magento.
+
+## What I owned
+
+- End-to-end migration ownership across data, APIs, and admin tooling.
+- Refactor of class definitions and custom object types to match the new Pimcore data model.
+- Rebuild of API integrations between Pimcore and Magento to use updated endpoints and contracts.
+- Twig template updates across the admin interface.
+- Performance tuning post-migration, particularly around indexing and product data sync.
+
+## Notable challenges
+
+The most stubborn problem was indexing performance. The legacy stack had ~1 hour indexing runs that delayed product updates reaching the storefront. After migration, working through query optimisation, cache strategy, and refactored data models brought that down significantly, accelerating product data sync to Magento.
+
+## Outcome
+
+Delivered the migration without disruption to the live Magento storefront. Produced comprehensive technical documentation covering data models, API contracts, and deployment workflows, and onboarded the incoming development team taking over ongoing maintenance.
