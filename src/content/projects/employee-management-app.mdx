@@ -1,0 +1,76 @@
+---
+title: "Employee Management Mobile App — Clock-In to Payslip"
+summary: "Cross-platform mobile app for end-to-end employee management — geofenced clock-in/clock-out, leave requests, attendance history, and payslip access. Built in React Native for iOS and Android from a single codebase."
+stack:
+  ["React Native", "JavaScript", "Geolocation", "REST APIs", "iOS", "Android"]
+role: "Mobile Developer (Freelance)"
+period: "2024"
+---
+
+## Context
+
+A workforce management business needed a single mobile app covering the full employee lifecycle from clock-in through to payslip. Existing workflows were split across HR's web dashboard, supervisors' spreadsheets, and paper-based attendance — visible to admin but largely invisible to the employees themselves.
+
+A specific operational problem on top of the consolidation work: **clock-in fraud**. Without on-site verification, nothing stopped an employee clocking in from home, a café, or via a colleague's phone. The brief required attendance to be **location-verified** — clock-in only succeeds when the employee is physically at an approved office location.
+
+The deliverable: one mobile app for both iOS and Android, talking to the business's existing backend APIs. Single codebase, native feel, fast turnaround. React Native was the obvious fit.
+
+## What I built
+
+A complete cross-platform mobile application covering four core areas:
+
+### 1. Authentication and onboarding
+
+Login flow with persistent session storage and a guided onboarding screen for first-time users covering location and notification permissions — both of which the app actively needs, so permission denial is handled with an explicit blocking screen rather than letting the user proceed into a half-broken experience.
+
+### 2. Geofenced clock-in — the operational headline
+
+The headline feature, and the part the business cared about most. Each office location is configured server-side with its coordinates and an acceptable radius. When the employee taps clock-in:
+
+1. The app requests the device's current GPS coordinates via the platform's geolocation API
+2. It compares those coordinates against the configured office locations using the **haversine formula** for accurate distance-on-sphere calculation
+3. If the device is within the radius of any approved location, the clock-in is allowed and posted to the backend with both timestamp and verified location
+4. If the device isn't within range of any office, the user sees a clear "you must be on-site to clock in" message — no clock-in event is created
+
+The same check runs on clock-out. The radius and approved locations are admin-configurable per office without touching the app code, so the business can onboard new sites by updating the backend rather than shipping an app update.
+
+Real-time status in the UI reflects whether the user is currently clocked in, the day's accumulated hours, and the week's running total.
+
+### 3. Leave and time-off
+
+A leave request flow with form validation, leave-type selection (annual, sick, unpaid, etc.), date range pickers, and approval-status tracking. Once submitted, employees see real-time status as their supervisor reviews the request, with push notification on decision.
+
+### 4. Payslip access — the "Payslip" half of the brief
+
+Historical payslip listing with download support. Payslips are rendered from PDF responses returned by the backend, displayed in-app rather than redirecting to a browser. Filtering by year and month.
+
+## Architecture and design decisions
+
+**Single shared codebase across iOS and Android.** Roughly 98% of the code is platform-agnostic JavaScript. The remaining ~2% is small native bridging (geolocation permission flows, notification permissions) and a handful of platform-conditional UI adjustments (mostly safe-area handling and platform-appropriate date pickers).
+
+**API-first design.** The app is a thin client over the existing HR backend. State management uses local component state for ephemeral UI, with a thin service layer handling API calls, authentication tokens, and short-lived caching for the most-accessed screens (current month's attendance, latest payslip).
+
+**Location handling done carefully.** Geolocation on mobile is full of edge cases — permission denied, permission granted but GPS off, GPS on but no fix yet, fix arrived but accuracy is 500m and useless. The app distinguishes between these states explicitly and shows the right message for each. Critically, it **doesn't accept a location reading with poor accuracy** and falls back to "we couldn't verify your location — try moving outside or waiting a moment" rather than silently allowing a clock-in based on a useless reading.
+
+**Asset and bundle optimisation.** Hermes runtime on Android, properly-sized image assets per density bucket, and lazy-loaded screens via React Native's standard navigation patterns to keep cold-start time low.
+
+## Notable challenges
+
+**Geofencing accuracy at building scale.** Office radii are typically 50–100 metres — small enough that GPS accuracy genuinely matters. The implementation uses a configurable accuracy threshold: location readings worse than the threshold get rejected with a "still locating, hold on" state rather than being trusted. This trades a few seconds of perceived delay for the guarantee that approved clock-ins are genuinely at the office.
+
+**Permission flow on Android vs iOS.** iOS and Android handle location permissions differently — Android distinguishes coarse vs fine, both platforms have "always allow" vs "while using app" toggles, and both can have permissions revoked after granting. The app handles each state explicitly: if permission is denied or downgraded, the clock-in screen surfaces an actionable "open Settings to fix" link rather than failing silently.
+
+**Time zones in attendance.** Employees travel; the backend stores everything in UTC; the app needs to display local times respecting the device's current timezone but also handle "the day's hours" boundaries (a shift starting at 22:00 and ending at 06:00 should belong to one shift, not split across two days). Handled with explicit timezone-aware logic in the attendance aggregation layer rather than relying on the device's local time alone.
+
+**Payslip PDF rendering.** Different PDF viewers behave differently between iOS and Android, and embedding a third-party viewer that worked identically across both took some experimentation. The chosen approach uses native PDF rendering on each platform via a thin wrapper, sized to the device's safe area.
+
+## Outcome
+
+The business shipped a single mobile app covering the full employee daily and monthly workflow — geofenced clock-in, leave management, attendance history, and payslip access — replacing a fragmented set of workflows with one app on both major mobile platforms. Off-site clock-ins, which had been impossible to prevent under the previous workflow, are now structurally impossible at the app layer.
+
+## Architecture notes
+
+- **One codebase, two platforms.** Approximately 98% code sharing between iOS and Android.
+- **Thin client over existing APIs.** No new backend was built — the app integrates with the business's existing HR system.
+- **Server-driven location config.** Office locations and radii live in the backend, not the app — new sites can be onboarded without an app update.
+- **Native UX, not webview.** Custom screens, native date pickers, native PDF rendering — feels like an app, not a wrapped website.

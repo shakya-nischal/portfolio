@@ -1,0 +1,78 @@
+---
+title: "WordPress Careers Site with HR System Integration, Submission Approval, and Anti-Spam Guard"
+summary: "Built a custom WordPress theme and supporting plugins for a corporate careers site: country-specific job application forms posting directly into an internal HR platform's API, an admin approval workflow over form submissions, and server-side validation blocking disposable emails and injected scripts."
+stack:
+  [
+    "WordPress",
+    "PHP",
+    "Elementor Pro",
+    "REST APIs",
+    "MySQL",
+    "JavaScript",
+    "cURL",
+  ]
+role: "Software Engineer"
+period: "2024 — 2025"
+---
+
+## Context
+
+A corporate careers site needed to do three things that the standard WordPress + Elementor toolkit doesn't do out of the box:
+
+1. **Push job applications directly into an internal HR platform** instead of dumping them into a WordPress database for someone to copy across by hand.
+2. **Give the operations team an explicit approval step** over general contact submissions, since the form was being hit by automated spam and the team only wanted to send thank-you emails after a human had eyeballed the message.
+3. **Block low-quality submissions at the form layer** — disposable email providers, public webmail addresses where work emails were required, and bodies containing URLs or injected scripts.
+
+The site itself was Elementor-driven. I built a custom WordPress theme around it and two supporting plugins.
+
+## What I built
+
+### 1. Country-aware job application sync (custom theme)
+
+Job listings render through a custom theme. Each "Apply" form is a country-specific Elementor form, with different required fields per region — some required only the standard name/email/phone/CV combination, others required additional documents like a motivational letter or country-specific identification fields.
+
+When the form submits, a hook on `elementor_pro/forms/new_record` validates the country-specific fields, resolves the job ID from a hidden field, then POSTs a multipart payload to the HR platform's application endpoint via cURL — including the CV file and any additional supporting documents as binary attachments with proper MIME types.
+
+The HR platform receives a structured application record automatically. Recruitment moves from "check WordPress, copy fields, download file, re-upload to HR system" to "open the HR platform, the application is already there."
+
+### 2. Admin approval workflow (custom plugin)
+
+For the general Contact Form, the operations team wanted an explicit "approve" step before any automated email was sent.
+
+I built a plugin that:
+
+- Injects a custom **Approval** column into Elementor's submissions admin table
+- Renders an **Approve** button on each row for relevant form submissions
+- Wires the button to a WordPress AJAX endpoint with nonce-based CSRF protection
+- On approval, retrieves the submission via Elementor's submissions manager, sends a thank-you email to the applicant, notifies the operations team, and marks the submission's post meta as approved (so the button is replaced with a green "Approved" badge on reload)
+- Uses a `MutationObserver` on the admin table to re-inject the column on Elementor's client-side pagination — without this, the buttons would disappear when admins navigated between pages
+
+### 3. Server-side form guard (custom plugin)
+
+Form spam was the third problem. I built a validation plugin running on `elementor_pro/forms/validation` that, for the Contact Form specifically:
+
+- Rejects messages containing URLs (`https?://`, `www.`, bare domain patterns), `<script>` tags, `javascript:` schemes, and inline event handlers — patterns spammers use to push links or attempt injection
+- Rejects email submissions from a curated list of public webmail providers (major free email services, regional family domains, etc.) — the business wanted work emails only
+- Rejects emails from disposable-mail providers (the well-known throwaway services and ~15 other patterns)
+
+The guard runs server-side on every submission — it can't be bypassed by disabling client-side JavaScript. Errors come back via Elementor's standard `add_error` interface, so they show up in the form's own error styling without any custom frontend work.
+
+## Notable challenges
+
+**File handling across two systems.** WordPress saves Elementor uploads to a path under `wp-content/uploads`. The HR platform's API expected the file as a multipart attachment, not a URL. The bridge code resolves the local filesystem path from the URL, validates the file exists, then wraps it in `curl_file_create` with the correct MIME type before sending. Validation up front prevents the API call from happening with a missing file.
+
+**Elementor's submission admin UI is React-rendered.** Injecting a column into an admin table that React owns means working with the DOM after React has rendered it. The plugin uses a `MutationObserver` on the table body to re-run column injection when Elementor swaps rows on pagination or filtering. Cheaper than trying to find an official Elementor extension point.
+
+**Detecting "public webmail" is messier than it looks.** Major providers like Yahoo have dozens of regional TLDs. The guard uses a combination of exact-domain matching for the common providers and regex patterns for the families with regional variants — list maintained inline rather than hidden in a dependency.
+
+## Outcome
+
+- **Job applications** flow directly into the HR platform with no manual handling — recruitment opens the platform and the application is already there with CV and supporting documents attached.
+- **Contact submissions** are gated by a human approval step, with automatic thank-you and team-notification emails fired only after approval.
+- **Form spam dropped sharply** once the guard plugin was active — the combination of URL-pattern blocking and disposable-email rejection covered most of the volume the team had been triaging by hand.
+
+## Architecture notes
+
+- **Three loosely-coupled pieces** — the theme handles job application sync, the approver plugin handles contact moderation, the guard plugin handles validation. Each can be disabled independently without breaking the others.
+- **All sensitive config** (HR endpoint, API key) comes from theme constants rather than being hardcoded in per-page templates.
+- **Server-side validation throughout** — nothing relies on client-side JavaScript for security checks.

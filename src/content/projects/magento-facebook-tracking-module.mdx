@@ -1,0 +1,67 @@
+---
+title: "Magento 2 Facebook Pixel & Conversions API Module"
+summary: "Lightweight, dependency-free Magento 2 extension that integrates Facebook Pixel (browser-side) and Conversions API (server-side) for accurate Meta Ads attribution — replacing heavy third-party modules with a focused, upgrade-safe implementation."
+stack:
+  [
+    "Magento 2",
+    "PHP",
+    "Facebook Conversions API",
+    "Guzzle",
+    "Dependency Injection",
+  ]
+role: "Software Engineer (Freelance)"
+period: "2025"
+---
+
+## Context
+
+An eCommerce store running Meta Ads needed better tracking attribution. Browser-side tracking alone (Facebook Pixel) was losing events to ad blockers, iOS privacy changes, and the general decline in client-side reliability that's eroded the accuracy of Meta's data since 2021.
+
+The store was using a third-party Magento marketplace module to handle this, but it was heavy, slow to load, locked into the vendor's update cycle, and shipped with features the business didn't need. The brief was to **replace it with a focused, custom-built module** doing only what the business actually used.
+
+## What I built
+
+A two-part tracking module covering both sides of Meta's recommended dual-pixel-and-CAPI approach.
+
+### 1. Browser-side: Facebook Pixel
+
+The Pixel script gets injected into the storefront `<head>` via Magento's layout XML — a `.phtml` template renders the Pixel snippet conditionally, only when tracking is enabled and a Pixel ID is configured. PageView events fire on every page load via the standard Pixel mechanism.
+
+Admin can toggle the Pixel on/off, set the Pixel ID, and configure environment-specific behaviour from a dedicated section under Stores → Configuration → Tracking → Facebook Tracking.
+
+### 2. Server-side: Conversions API (CAPI)
+
+The more interesting half. Server-side events bypass ad blockers and privacy extensions entirely — Meta receives the event regardless of what's happening in the customer's browser.
+
+An observer fires on the `checkout_onepage_controller_success_action` event (Magento's "order placed" hook). It builds a Purchase event payload containing:
+
+- **Hashed user data** — email SHA-256-hashed before transmission, in line with Meta's PII requirements
+- **Client IP and User-Agent** — captured at the observer level from the request
+- **Order ID** as the event_id (used by Meta to deduplicate against browser-side events covering the same purchase)
+- **Order total and currency**
+- **Event timestamp** synced to the order placement time
+
+The payload posts to Meta's Graph API via a custom Guzzle-based API client. If the access token isn't configured, the entire CAPI path silently no-ops rather than erroring — this lets the Pixel half work independently if the business hasn't completed CAPI setup yet.
+
+### 3. Observability
+
+Every CAPI request and response is logged to Magento's `var/log/system.log` with the full request payload and the Graph API response. This was important during rollout — Meta Events Manager has a 20-minute delay before events show up in their UI, so being able to verify "did Facebook receive this?" without leaving the server logs accelerated debugging massively.
+
+## Notable challenges
+
+**Event deduplication.** When both Pixel (browser) and CAPI (server) fire for the same purchase, Meta will count it twice unless you tell them which events match. The fix is using the order ID as a stable `event_id` on both sides — Meta's matching logic then deduplicates them server-side. This is documented but easy to miss, and the symptom (inflated conversion numbers) wouldn't show up for days.
+
+**Hashing requirements.** Meta rejects unhashed PII. The implementation lowercases and trims email before SHA-256 hashing, in line with Meta's normalisation rules — slightly different from "just hash the string."
+
+**Configurable but safe defaults.** The admin config uses Magento's `obscure` field type for the CAPI access token (input shows as `••••••••` after save, value retrieved through `ConfigDecryptor` rather than plain text). Operations teams asked for this — they didn't want the token visible to staff with admin access but not full system access.
+
+## Outcome
+
+The store retired its third-party tracking module in favour of the custom one. Storefront pages load with one fewer dependency. CAPI events flow reliably to Meta, complementing the Pixel data for substantially better ad attribution post-iOS-14.
+
+## Architecture notes
+
+- **No core overrides, no rewrites.** Every integration point is an observer, layout XML extension, or DI-injected service. Survives Magento upgrades cleanly.
+- **Dependency injection throughout.** The API client, config decryptor, and observers are all wired via Magento's `di.xml` — easy to swap implementations for testing.
+- **Guzzle for HTTP** rather than `curl_init` or Magento's deprecated HTTP clients — modern, async-capable if needed later, and the de facto PHP standard.
+- **Frontend Pixel render via `.phtml` template** rather than inline echo — keeps the markup in version-controllable, designer-readable territory.

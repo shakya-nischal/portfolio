@@ -1,0 +1,73 @@
+---
+title: "Custom Magento 2 Shipping Carrier Integration"
+summary: "Built a complete Magento 2 module integrating a third-party delivery service across rate calculation, checkout location picker, order creation, webhook-driven status sync, and shipment lifecycle — replacing a manual order-handoff workflow with end-to-end automation."
+stack:
+  [
+    "Magento 2",
+    "PHP",
+    "MySQL",
+    "REST APIs",
+    "Webhooks",
+    "Guzzle",
+    "Dependency Injection",
+  ]
+role: "Software Engineer (Freelance)"
+period: "2025"
+---
+
+## Context
+
+An eCommerce store running on Magento 2 needed deep integration with a regional delivery service provider. Before this work, the team manually copied order details from Magento into the provider's dashboard after every checkout — slow, error-prone, and impossible to scale as order volume grew.
+
+The brief was to make the two systems behave as one: shipping rates calculated live during checkout, location-aware delivery options surfaced to the customer, orders pushed automatically to the provider on order placement, and shipment status flowing back into Magento as the delivery moved through the carrier's pipeline.
+
+## What I built
+
+The module is a full-stack Magento 2 extension following the platform's modular conventions — no core overrides, no rewrites, fully upgrade-safe. Architecturally it splits into five concerns:
+
+### 1. Shipping carrier registration
+
+A custom carrier class implementing Magento's `CarrierInterface`. During cart and checkout, it queries the provider's rate API based on the customer's selected location, applies currency conversion when the store and provider use different currencies, and returns shipping options into Magento's standard rate flow. Customers see live, accurate shipping costs — not hardcoded estimates.
+
+### 2. Custom checkout location picker
+
+Magento's stock address form doesn't fit the provider's location model, which uses a two-level hierarchy (city/region, then sub-area) rather than free-text addresses. I extended the checkout via layout plugins and added endpoints to:
+
+- Search and filter the provider's location catalogue
+- Save the customer's chosen location against their quote
+- Surface saved locations on repeat checkouts
+
+Location data is persisted in a dedicated table tied to the Magento quote via foreign key, then carried through into the order on placement.
+
+### 3. Order creation pipeline
+
+When an order is placed, an observer builds the delivery payload from the order data and pushes it to the provider's order-creation endpoint. The provider's tracking code comes back in the response and gets stored in a custom order-mapping table — one row per Magento order, with unique constraints on both the tracking code and an internal reference ID. This mapping table is the source of truth for everything that follows.
+
+### 4. Webhook-driven status sync
+
+The delivery provider posts status updates (in transit, out for delivery, delivered, returned, cancelled) to a public webhook endpoint exposed by the module. A dedicated webhook processor validates the payload, looks up the corresponding Magento order via the mapping table, and updates the order — creating Magento shipments and shipment tracks automatically when the delivery reaches dispatch, and reflecting failure states back into the order status.
+
+This was the part that needed the most care: webhooks can arrive out of order, be retried by the provider, or come in for orders that no longer exist. The processor handles each case explicitly rather than assuming clean inputs.
+
+### 5. Admin controls
+
+Store admins can test the API connection from Magento's config screen, view the location list, manually sync an order's status, and view the tracking page per order. Useful when an integration is new and trust hasn't been earned yet — operations teams want a "do it manually" escape hatch.
+
+## Notable challenges
+
+**Magento's checkout customisation surface is famously hostile.** Adding a custom field that survives the entire quote-to-order journey requires plugins at the right layout-processor levels, extension attributes properly declared, and careful work to avoid breaking other shipping methods. The location picker took several iterations to feel native rather than bolted-on.
+
+**Webhook idempotency.** Delivery providers retry aggressively on any non-2xx response. The processor had to be safe to call repeatedly with the same payload — that meant explicit "have I seen this status transition before?" checks rather than blind state mutation.
+
+**Currency mismatch.** The store priced in one currency, the provider quoted in another. I built a small exchange service to bridge them, with the rate sourced from configurable scope-level admin settings.
+
+## Outcome
+
+The store moved from manual order copying to fully automated dispatch. Operations no longer touched the delivery dashboard for routine orders — only for exceptions. Customers saw real shipping rates during checkout and could track their delivery without leaving the storefront.
+
+## Architecture highlights
+
+- **No core overrides.** Every customisation is a plugin, observer, or DI-injected service — the module survives Magento upgrades cleanly.
+- **Custom DB schema** with proper foreign keys (`ON DELETE CASCADE` into core sales and quote tables), unique constraints on tracking and reference IDs, and BTree indexes on lookup columns.
+- **Separation of concerns:** the API client knows nothing about Magento, the carrier knows nothing about the database, the webhook processor knows nothing about the API client. Each service is independently testable.
+- **Admin and storefront controllers** for location lookup, webhook receipt, manual sync, and admin testing — all routed through Magento's ACL and CSRF systems.
