@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Mail } from "lucide-react";
-import { SiGithub } from "@icons-pack/react-simple-icons";
+import { SiGithub, SiLinkedin } from "@icons-pack/react-simple-icons";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const sections = [
@@ -70,10 +70,10 @@ export function Sidebar() {
         <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight">
           Nischal Shakya
         </h1>
-        <h2 className="mt-3 text-lg text-foreground">Software Engineer</h2>
+        <h2 className="mt-3 text-lg text-foreground">Software Engineer | Data Engineering & Analytics</h2>
         <p className="mt-4 max-w-xs text-muted-foreground leading-relaxed">
-          I build scalable web and eCommerce platforms, and I&apos;m moving into
-          data engineering.
+          I build software and data solutions across web, eCommerce, data
+          warehousing, analytics, and system integrations.
         </p>
 
         {/* Anchor nav — desktop only */}
@@ -127,7 +127,7 @@ export function Sidebar() {
           aria-label="LinkedIn"
           className="text-muted-foreground hover:text-foreground transition-colors"
         >
-          <SiGithub className="h-5 w-5" />
+          <SiLinkedin className="h-5 w-5" />
         </Link>
         <Link
           href="mailto:shakyanischal2913@gmail.com"
