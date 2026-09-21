@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import { SiGithub } from "@icons-pack/react-simple-icons";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 function LinkedInIcon({ className }: { className?: string }) {
   return (
@@ -21,6 +20,7 @@ function LinkedInIcon({ className }: { className?: string }) {
 
 const sections = [
   { id: "about", label: "About" },
+  { id: "skills", label: "Skills" },
   { id: "experience", label: "Experience" },
   { id: "projects", label: "Projects" },
   { id: "contact", label: "Contact" },
@@ -151,9 +151,6 @@ export function Sidebar() {
         >
           <Mail className="h-5 w-5" />
         </Link>
-        <div className="ml-auto">
-          <ThemeToggle />
-        </div>
       </div>
     </aside>
   );

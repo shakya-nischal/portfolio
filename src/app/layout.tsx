@@ -3,20 +3,57 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { GlobalThemeToggle } from "@/components/global-theme-toggle";
 
 export const metadata: Metadata = {
   title: {
-    default: "Nischal Shakya — Software Engineer",
+    default:
+      "Nischal Shakya | Software Engineer | Data Engineering & Analytics",
     template: "%s | Nischal Shakya",
   },
   description:
-    "Full-stack Software Engineer specialising in PHP, JavaScript, and modern data engineering. Currently pursuing MRes in Cyber Security.",
+    "Portfolio of Nischal Shakya, a Software Engineer with 3+ years of professional experience in web, eCommerce, APIs, and system integration, expanding into Data Engineering and Analytics through SQL, data warehousing, Power BI, Excel, and Python.",
+  keywords: [
+    "Nischal Shakya",
+    "Software Engineer",
+    "Data Engineer",
+    "Data Analyst",
+    "Data Engineering",
+    "Data Analytics",
+    "SQL",
+    "SQL Server",
+    "T-SQL",
+    "ETL",
+    "Data Warehousing",
+    "Power BI",
+    "Excel",
+    "Python",
+    "PHP",
+    "Pimcore",
+    "Magento 2",
+    "React",
+    "UK",
+  ],
+  authors: [{ name: "Nischal Shakya" }],
+  creator: "Nischal Shakya",
   metadataBase: new URL("https://portfolio-iota-eight-s7tpcpzd95.vercel.app"),
   openGraph: {
-    title: "Nischal Shakya — Software Engineer",
-    description:
-      "Full-stack Software Engineer. PHP, React, Magento, Pimcore, and the modern data stack.",
     type: "website",
+    url: "https://nischal-shakya.vercel.app",
+    title: "Nischal Shakya | Software Engineer | Data Engineering & Analytics",
+    description:
+      "Software engineering, data engineering, analytics, and research projects by Nischal Shakya.",
+    siteName: "Nischal Shakya Portfolio",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nischal Shakya | Software Engineer | Data Engineering & Analytics",
+    description:
+      "Software engineering, data engineering, analytics, and research projects by Nischal Shakya.",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -38,6 +75,7 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+          <GlobalThemeToggle />
           {children}
         </ThemeProvider>
       </body>

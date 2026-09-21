@@ -67,14 +67,14 @@ export default async function ProjectPage({
       </header>
 
       {/* MDX content */}
-      <article className="prose-content text-muted-foreground">
+      <article className="prose-content">
         <MDXRemote source={project.content} components={components} />
       </article>
 
       {/* Footer back link */}
       <div className="mt-24 pt-8 border-t border-border">
         <Link
-          href="/#projects"
+          href="/work"
           className="group inline-flex items-center gap-1.5 text-sm text-foreground hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />

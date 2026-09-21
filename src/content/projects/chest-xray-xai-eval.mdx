@@ -1,0 +1,179 @@
+---
+title: "Explainable AI for Chest X-ray Diagnosis"
+summary: "MRes research comparing ResNet-50 and DINO-ViT-S for chest X-ray classification, with quantitative explainability evaluation and LLM-assisted clinical communication."
+stack:
+  [
+    "Python",
+    "PyTorch",
+    "ResNet-50",
+    "Vision Transformer",
+    "Grad-CAM",
+    "Explainable AI",
+  ]
+role: "MRes Research Project"
+period: "2026"
+featuredOrder: 3
+---
+
+## Context
+
+This project forms part of my MRes Cyber Security research at the University of Wolverhampton.
+
+The research investigates how explainable AI methods behave across convolutional neural networks and Vision Transformers for medical image classification, with a particular focus on whether model explanations are faithful, localised, and robust.
+
+The study compares a **ResNet-50 CNN** with a **DINO-ViT-S Vision Transformer** on chest radiographs.
+
+## Dataset
+
+The experiments use a balanced subset of the **NIH ChestX-ray14** dataset containing **14,000 chest radiographs**:
+
+- 7,000 Normal
+- 7,000 Diseased
+
+The dataset is formulated as a binary classification problem:
+
+**Normal → 0**
+
+**Diseased → 1**
+
+The data was divided into training, validation, and held-out test sets, with **2,100 images reserved for final testing**.
+
+Radiologist-provided bounding-box annotations were also preserved for localisation-based explainability evaluation.
+
+## Model comparison
+
+Two different model families were evaluated:
+
+### ResNet-50
+
+An ImageNet-pretrained ResNet-50 provides the CNN baseline.
+
+Its convolutional architecture learns hierarchical spatial features and provides a natural target for gradient-based explanation methods such as Grad-CAM.
+
+### DINO-ViT-S
+
+The transformer model uses a self-supervised DINO Vision Transformer.
+
+Instead of convolutional feature maps, the image is divided into patches and processed through transformer blocks using self-attention.
+
+This provides a contrasting architecture for investigating whether transformer-based explanations behave differently from conventional CNN explanations.
+
+## Explainability
+
+The project evaluates two major explanation approaches.
+
+### Grad-CAM
+
+Grad-CAM uses gradients and intermediate activations to identify image regions that contributed strongly to a model prediction.
+
+It was applied to the ResNet-50 baseline and adapted for the transformer architecture.
+
+### Attention Rollout
+
+Attention Rollout was used with the Vision Transformer to aggregate attention information across transformer layers and generate a CLS-to-patch explanation map.
+
+This allowed transformer attention to be examined alongside gradient-based explanations.
+
+## Quantitative XAI evaluation
+
+Rather than evaluating heatmaps only through visual inspection, the project uses quantitative metrics across three dimensions.
+
+### Faithfulness
+
+Faithfulness measures whether regions highlighted by an explanation genuinely influence the model prediction.
+
+The evaluation includes:
+
+- **Insertion AUC**
+- **Deletion AUC**
+
+Insertion progressively introduces highly important regions, while deletion removes them to observe how the prediction changes.
+
+### Localisation
+
+Localisation evaluates whether explanations correspond to clinically annotated regions.
+
+Metrics include:
+
+- **Intersection over Union (IoU)**
+- **Pointing Game**
+
+These are evaluated against available radiologist bounding-box annotations.
+
+### Robustness
+
+Explanation stability is evaluated under image perturbations such as blur, noise, and cropping.
+
+**Structural Similarity Index (SSIM)** is used to measure how consistently explanation maps behave after these perturbations.
+
+## Statistical evaluation
+
+Model and explanation results were also compared using the **Wilcoxon signed-rank test**.
+
+This provides a non-parametric paired comparison and helps distinguish statistically significant differences from differences that may be small in practical terms.
+
+## Composite Trustworthiness Index
+
+To provide a combined view of explanation quality, the project explores a **Composite Trustworthiness Index (CTI)**.
+
+The CTI synthesises information from:
+
+- faithfulness
+- localisation
+- robustness
+
+rather than treating a single XAI metric as sufficient evidence of explanation reliability.
+
+The individual metrics remain available so that the composite score does not replace detailed interpretation.
+
+## LLM clinical communication
+
+The project also explores an LLM-based communication layer using **Gemini 2.5 Flash**.
+
+The LLM is **not used to classify the chest X-ray**.
+
+Instead, it receives structured information derived from the model output and explanation evaluation, including anatomical-region information and explanation-reliability indicators.
+
+It then generates a structured plain-language report intended to make technical model outputs easier to interpret.
+
+This component is treated as a communication experiment rather than a diagnostic system, with hallucination risk and clinical safety considered as important limitations.
+
+## What I learned
+
+This project strengthened my practical understanding of the complete machine-learning research workflow, including:
+
+- medical-image preprocessing
+- PyTorch datasets and data loaders
+- transfer learning and model fine-tuning
+- CNN and Vision Transformer architectures
+- Grad-CAM
+- transformer attention
+- quantitative XAI evaluation
+- statistical hypothesis testing
+- experiment design
+- model-comparison methodology
+- communicating technical results to non-specialist audiences
+
+It also reinforced that visually convincing AI explanations are not necessarily trustworthy explanations and should be evaluated quantitatively.
+
+## Limitations
+
+The project should not be interpreted as a clinical diagnostic system.
+
+Important limitations include:
+
+- binary Normal/Diseased classification rather than pathology-specific diagnosis
+- limited localisation annotations compared with the full classification dataset
+- dependence on the selected XAI methods and evaluation metrics
+- potential instability in transformer attention explanations
+- limitations of composite trustworthiness scoring
+- hallucination and interpretation risks when using an LLM communication layer
+- no clinical-user study validating whether the generated reports improve clinician understanding
+
+These limitations are important when interpreting the research results.
+
+## Source
+
+The implementation, notebooks, evaluation results, and project documentation are available on GitHub.
+
+[View the Chest X-ray XAI project on GitHub](https://github.com/shakya-nischal/chest-xray-xai-eval)

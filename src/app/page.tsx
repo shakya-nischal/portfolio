@@ -6,8 +6,60 @@ import { ProjectCard } from "@/components/project-card";
 import { experience } from "@/lib/experience";
 import { getAllProjects } from "@/lib/projects";
 
+const skillGroups = [
+  {
+    title: "Data Engineering & Analytics",
+    skills: [
+      "SQL",
+      "SQL Server",
+      "T-SQL",
+      "ETL",
+      "Data Warehousing",
+      "Dimensional Modelling",
+      "Power BI",
+      "DAX",
+      "Power Query",
+      "Excel",
+      "Python",
+    ],
+  },
+  {
+    title: "Software Engineering",
+    skills: [
+      "PHP",
+      "JavaScript",
+      "TypeScript",
+      "Laravel",
+      "Symfony",
+      "Pimcore",
+      "Magento 2",
+      "React",
+      "React Native",
+      "WordPress",
+      "Shopify",
+      "REST APIs",
+    ],
+  },
+  {
+    title: "Databases, Tools & Infrastructure",
+    skills: [
+      "MySQL",
+      "MariaDB",
+      "Docker",
+      "Apache",
+      "Nginx",
+      "Git",
+      "GitHub",
+      "Jira",
+    ],
+  },
+];
+
 export default function HomePage() {
-  const featured = getAllProjects().slice(0, 4);
+  const featured = getAllProjects()
+    .filter((project) => project.featuredOrder !== undefined)
+    .sort((a, b) => a.featuredOrder! - b.featuredOrder!)
+    .slice(0, 4);
 
   return (
     <div className="mx-auto max-w-screen-xl">
@@ -19,29 +71,62 @@ export default function HomePage() {
           <h2 className="sr-only">About</h2>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              I&apos;m a Software Engineer based in Farnborough, currently
-              pursuing an{" "}
+              I&apos;m a{" "}
+              <span className="text-foreground">Software Engineer</span> with 3+
+              years of professional experience building web, eCommerce, API, and
+              system-integration solutions. My engineering background includes
+              PHP, Pimcore, Magento 2, WordPress, Laravel, React, and React
+              Native, with experience working on enterprise platforms and
+              collaborating with international teams.
+            </p>
+
+            <p>
+              I&apos;m currently pursuing an{" "}
               <span className="text-foreground">MRes in Cyber Security</span> at
-              the University of Wolverhampton. My background is in building
-              scalable enterprise systems — PHP, Magento 2, Pimcore, WordPress,
-              Laravel — for international clients, with React and React Native
-              on the frontend and mobile side.
+              the University of Wolverhampton while expanding into{" "}
+              <span className="text-foreground">
+                Data Engineering and Analytics
+              </span>
+              . My recent hands-on work includes SQL Server, T-SQL, ETL, data
+              warehousing, dimensional modelling, Excel, Power BI, DAX, Power
+              Query, Python, and Docker.
             </p>
+
             <p>
-              Right now I&apos;m moving toward{" "}
-              <span className="text-foreground">data engineering</span>,
-              building skills in Python, dbt, Airflow, Snowflake, and AWS to
-              complement the data-heavy integration work I&apos;ve done across
-              PIM systems and eCommerce platforms. The MRes brings the
-              security-aware lens that&apos;s increasingly valuable in modern
-              data infrastructure.
+              I enjoy working across the full data and software lifecycle — from
+              backend systems and raw data through cleaning, transformation,
+              modelling, analysis, and user-facing solutions. I&apos;m
+              particularly interested in building reliable data pipelines and
+              analytical solutions that turn complex data into useful insights.
             </p>
-            <p>
-              Outside of code, I care about clear documentation, mentoring
-              junior engineers, and bridging non-technical stakeholders with
-              engineering teams. If you&apos;d like to chat about a role or
-              project, the inbox is open.
-            </p>
+          </div>
+        </section>
+
+        {/* Skills & Technologies */}
+        <section id="skills" className="scroll-mt-16 mb-24">
+          <h2 className="text-sm font-mono uppercase tracking-widest text-muted-foreground mb-8 lg:sr-only">
+            Skills & Technologies
+          </h2>
+
+          <div className="space-y-8">
+            {skillGroups.map((group) => (
+              <div key={group.title}>
+                <h3 className="mb-3 text-sm uppercase tracking-widest text-foreground">
+                  {group.title}
+                </h3>
+
+                <div className="flex flex-wrap gap-2">
+                  {group.skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="rounded-full border border-border bg-muted/40 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -99,11 +184,13 @@ export default function HomePage() {
           </h2>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              Currently open to{" "}
-              <span className="text-foreground">data engineering</span> roles in
-              the UK (Graduate Route visa, no sponsorship needed) and selective{" "}
-              <span className="text-foreground">freelance engagements</span>{" "}
-              around PHP, eCommerce, or system integration work.
+              I&apos;m currently open to opportunities in{" "}
+              <span className="text-foreground">
+                Data Engineering, Data Analytics, and Software Engineering
+              </span>{" "}
+              in the UK. I&apos;m also open to selective freelance projects
+              involving web development, eCommerce, APIs, and system
+              integrations.
             </p>
             <p>
               Quickest reply by email —{" "}

@@ -1,0 +1,152 @@
+---
+title: "SQL Server Data Warehouse & ETL Pipeline"
+summary: "End-to-end SQL Server data warehouse built using a Bronze, Silver, and Gold architecture — transforming raw CRM and ERP data into clean dimensional models and analytics-ready datasets."
+stack:
+  [
+    "SQL Server",
+    "T-SQL",
+    "ETL",
+    "Data Warehousing",
+    "Dimensional Modelling",
+    "Docker",
+  ]
+role: "Data Engineering Project"
+period: "2026"
+featuredOrder: 1
+---
+
+## Context
+
+I built this project as a hands-on introduction to modern data warehousing and data engineering using SQL Server.
+
+The goal was to take raw CRM and ERP data from multiple CSV sources and design a structured pipeline that separates ingestion, transformation, and business-ready analytical data.
+
+The resulting workflow follows a layered architecture:
+
+**CRM & ERP Sources → Bronze → Silver → Gold → Analytics**
+
+This project was developed as a learning project based on the Data Warehouse with SQL Server tutorial by Data with Baraa, while implementing and documenting the warehouse locally using SQL Server running in Docker.
+
+## Architecture
+
+The warehouse is divided into three logical layers.
+
+### 1. Bronze — Raw ingestion
+
+The Bronze layer preserves source data in its original structure.
+
+Raw CRM and ERP CSV files are loaded into SQL Server using `BULK INSERT`.
+
+The ingestion procedure:
+
+- truncates existing Bronze tables before each full refresh
+- loads the source datasets
+- tracks execution time for each table
+- uses `TRY/CATCH` error handling
+- preserves the source structure for downstream processing
+
+This creates a reproducible landing layer without mixing business transformations into ingestion.
+
+### 2. Silver — Cleaning and transformation
+
+The Silver layer converts raw source data into consistent, analysis-ready records.
+
+Transformations include:
+
+- removing duplicate records with `ROW_NUMBER()`
+- trimming inconsistent text values
+- standardising categorical values with `CASE`
+- handling missing values with `ISNULL` and `NULLIF`
+- normalising product and customer attributes
+- deriving and validating date ranges
+- integrating CRM and ERP attributes
+- applying business rules before data reaches the analytical layer
+
+Window functions such as `ROW_NUMBER()` and `LEAD()` are used where record ordering and historical relationships are required.
+
+### 3. Gold — Dimensional model
+
+The Gold layer exposes business-ready views designed for reporting and analytics.
+
+The model contains:
+
+- `gold.dim_customers`
+- `gold.dim_products`
+- `gold.fact_sales`
+
+The dimensions consolidate descriptive customer and product information, while the sales fact view connects transactional sales data to those dimensions.
+
+Surrogate keys are generated for the dimensional views, creating a simplified star-schema-style model for downstream analytics.
+
+## Data quality
+
+Quality checks are included throughout the project rather than treating validation as a final manual step.
+
+Checks cover areas such as:
+
+- duplicate primary identifiers
+- missing or invalid keys
+- unwanted spaces
+- inconsistent categorical values
+- invalid date relationships
+- data integration issues
+- referential consistency between dimensions and facts
+
+Separate quality-check scripts are provided for the Silver and Gold layers.
+
+## Repository structure
+
+The repository separates database development into clearly defined areas:
+
+- **datasets** — source-data location and documentation
+- **scripts/bronze** — raw-layer DDL and ingestion
+- **scripts/silver** — cleaning and transformation logic
+- **scripts/gold** — dimensional views
+- **tests** — data-quality checks
+- **docs** — architecture, data catalogue, naming conventions, and supporting documentation
+
+This structure keeps ingestion, transformation, modelling, testing, and documentation independent and easier to maintain.
+
+## What I learned
+
+This project strengthened my understanding of the complete data warehouse lifecycle rather than SQL queries in isolation.
+
+In particular, I gained hands-on experience with:
+
+- layered data architecture
+- ETL pipeline design
+- SQL Server and T-SQL
+- data cleaning and standardisation
+- window functions
+- integrating multiple source systems
+- dimensional modelling
+- fact and dimension design
+- data-quality validation
+- analytical data preparation
+- running SQL Server in Docker
+
+It also reinforced the importance of separating raw data, transformations, and business-facing models instead of performing every operation in a single SQL layer.
+
+## Future improvements
+
+The current implementation uses full-refresh loading for the Bronze and Silver layers.
+
+Potential extensions include:
+
+- incremental loading
+- change data capture
+- pipeline orchestration
+- automated data-quality testing
+- historical dimension handling
+- Power BI integration
+- cloud deployment
+
+## Source
+
+The complete project, SQL scripts, documentation, and architecture are available on GitHub:
+
+[View the SQL Data Warehouse project on GitHub](https://github.com/shakya-nischal/sql-datawarehouse-project)
+
+## Acknowledgement
+
+This project was developed as a hands-on learning project based on the Data Warehouse with SQL Server tutorial by Data with Baraa on YouTube. I implemented the project locally, worked through the data engineering concepts, and documented the resulting architecture and learning outcomes in this repository.

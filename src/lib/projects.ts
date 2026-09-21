@@ -10,6 +10,7 @@ export type Project = {
   role: string;
   period: string;
   cover?: string;
+  featuredOrder?: number;
   content: string;
 };
 

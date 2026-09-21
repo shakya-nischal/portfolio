@@ -1,0 +1,112 @@
+---
+title: "HR Analytics Dashboard in Excel"
+summary: "Interactive Excel HR analytics dashboard transforming messy employee data into an analysis-ready dataset with workforce KPIs, attrition analysis, PivotTables, slicers, and dynamic visualisations."
+stack:
+  [
+    "Excel",
+    "Data Analytics",
+    "PivotTables",
+    "Data Cleaning",
+    "XLOOKUP",
+    "Dashboard",
+  ]
+role: "Data Analytics Project"
+period: "2026"
+featuredOrder: 2
+---
+
+## Context
+
+I built this project to practise the complete analytics workflow in Excel — starting with inconsistent employee data and transforming it into a clean dataset that could support HR reporting and interactive analysis.
+
+The project covers data cleaning, standardisation, lookup-based enrichment, validation, PivotTable analysis, KPI calculation, and dashboard design.
+
+The final analytical dataset contains **1,000 employee records**.
+
+## Data preparation
+
+The source data contained common data-quality issues including inconsistent text formatting, missing values, duplicate employee IDs, mixed date formats, inconsistent employment-status values, and fields requiring mapping against reference data.
+
+I created a structured cleaning workflow using Excel functions and dedicated lookup/master tables.
+
+Techniques included:
+
+- `TRIM`, `PROPER`, and `UPPER` for text standardisation
+- `XLOOKUP` and `VLOOKUP` for reference-data mapping
+- `IF` and `IFERROR` for validation and transformation logic
+- `VALUE` for numeric conversion
+- duplicate and missing-value checks
+- date standardisation
+- categorical-value normalisation
+
+Separate reference tables were used for departments, managers, locations, performance ratings, and cost centres.
+
+## Analysis-ready dataset
+
+After cleaning and enrichment, I created a dedicated source table for analytical reporting.
+
+This separated the workflow into clear stages:
+
+**Raw HR Data → Cleaning & Standardisation → Lookup Enrichment → Analysis-Ready Dataset → PivotTables → Dashboard**
+
+Keeping the raw, transformation, analytical, and presentation stages separate made the workbook easier to validate and maintain.
+
+## HR analysis
+
+PivotTables were used to analyse several areas of the workforce, including:
+
+- employee distribution by department
+- attrition by department
+- salary by job level
+- employee engagement across business units
+- training participation and training categories
+- overall workforce KPIs
+
+This allowed the dashboard to provide both a high-level workforce overview and more detailed breakdowns.
+
+## Dashboard
+
+The final dashboard presents key HR metrics and interactive visualisations in a single reporting view.
+
+Core KPIs include:
+
+- **Total Employees:** 1,000
+- **Attrition Rate:** 15.3%
+- **Average Salary:** 81,886
+- **Average Training Hours:** 23.89
+
+Slicers and PivotCharts allow the analysis to be explored interactively rather than relying on static tables.
+
+## What I learned
+
+This project strengthened my understanding of how spreadsheet-based analytics extends beyond charts and formulas.
+
+I gained practical experience with:
+
+- cleaning inconsistent real-world-style data
+- designing reusable lookup and master tables
+- validating analytical datasets
+- building PivotTables and PivotCharts
+- calculating HR KPIs
+- analysing attrition and workforce composition
+- designing interactive Excel dashboards
+- separating raw data, transformation, analysis, and presentation layers
+
+It also reinforced how important data quality and consistent business definitions are before visualisation begins.
+
+## Future improvements
+
+Potential extensions include:
+
+- rebuilding the dashboard in Power BI
+- creating reusable DAX measures
+- moving more transformation logic into Power Query
+- adding time-based hiring and attrition trends
+- expanding demographic and performance analysis
+- connecting the reporting layer to a database rather than a static workbook
+
+## Source
+
+The complete workbook, dashboard screenshot, and project documentation are available on GitHub.
+
+[View the HR Analytics Dashboard project on GitHub](https://github.com/shakya-nischal/excel-hr-analytics-dashboard)
