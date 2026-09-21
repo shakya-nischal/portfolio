@@ -3,8 +3,21 @@
 import * as React from "react";
 import Link from "next/link";
 import { Mail } from "lucide-react";
-import { SiGithub, SiLinkedin } from "@icons-pack/react-simple-icons";
+import { SiGithub } from "@icons-pack/react-simple-icons";
 import { ThemeToggle } from "@/components/theme-toggle";
+
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M5.34 3.5A2.34 2.34 0 1 1 .66 3.5a2.34 2.34 0 0 1 4.68 0ZM1 8h4.68v15H1V8Zm7.36 0h4.49v2.05h.06c.62-1.18 2.15-2.43 4.43-2.43 4.74 0 5.62 3.12 5.62 7.18V23h-4.68v-7.27c0-1.73-.03-3.96-2.41-3.96-2.42 0-2.79 1.89-2.79 3.84V23H8.36V8Z" />
+    </svg>
+  );
+}
 
 const sections = [
   { id: "about", label: "About" },
@@ -70,7 +83,9 @@ export function Sidebar() {
         <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight">
           Nischal Shakya
         </h1>
-        <h2 className="mt-3 text-lg text-foreground">Software Engineer | Data Engineering & Analytics</h2>
+        <h2 className="mt-3 text-lg text-foreground">
+          Software Engineer | Data Engineering & Analytics
+        </h2>
         <p className="mt-4 max-w-xs text-muted-foreground leading-relaxed">
           I build software and data solutions across web, eCommerce, data
           warehousing, analytics, and system integrations.
@@ -127,7 +142,7 @@ export function Sidebar() {
           aria-label="LinkedIn"
           className="text-muted-foreground hover:text-foreground transition-colors"
         >
-          <SiLinkedin className="h-5 w-5" />
+          <LinkedInIcon className="h-5 w-5" />
         </Link>
         <Link
           href="mailto:shakyanischal2913@gmail.com"
